@@ -51,8 +51,8 @@ function worksheet4
                 % Store snapshot at the specified times (snapshot_times)
                 timestamp = dt*n;
                 if find(timestamp == snapshot_times)
-                    snapshots_explicit = add_snapshot(snapshots_explicit, T_explicit, timestamp, N, dt);
-                    snapshots_implicit = add_snapshot(snapshots_implicit, T_implicit, timestamp, N, dt);
+                    snapshots_explicit = add_snapshot(snapshots_explicit, T_explicit, 'Explicit Euler', timestamp, N, dt);
+                    snapshots_implicit = add_snapshot(snapshots_implicit, T_implicit, 'Implicit Euler', timestamp, N, dt);
                 end
                 
             end % Timestepping loop
@@ -79,17 +79,18 @@ function worksheet4
         subplot_idx = determine_subplot_idx(snapshot.N, Ns, snapshot.dt, dts);
         fig = figure(fig_idx);
         set(fig, 'visible', 'off');
-        set_figure_title(fig, 'Explicit Euler', snapshot.t);
+        set_figure_title(fig, snapshot.method, snapshot.t);
         plot_snapshot(snapshot, subplot_rows, subplot_cols, subplot_idx);
-%         save_snapshot(snapshot);
+        save_snapshot(snapshot, build_image_name(snapshot.method, i, snapshot.N, snapshot.dt, snapshot.t));
         
         % Plots for Implicit Euler
         snapshot = snapshots_implicit(i);
         fig = figure(fig_idx + length(snapshot_times));
         subplot_idx = determine_subplot_idx(snapshot.N, Ns, snapshot.dt, dts);
         set(fig, 'visible', 'off');
-        set_figure_title(fig, 'Implicit Euler', snapshot.t);  
+        set_figure_title(fig, snapshot.method, snapshot.t);  
         plot_snapshot(snapshot, subplot_rows, subplot_cols, subplot_idx);
+        save_snapshot(snapshot, build_image_name(snapshot.method, i, snapshot.N, snapshot.dt, snapshot.t));
         
     end
     
@@ -104,11 +105,12 @@ function worksheet4
     % FUNCTIONS ===========================================================
     
     % Function to add a snapshot into a given array of snapshots
-    function snapshots_array = add_snapshot(snapshots_array, new_snapshot, timestamp, N, dt)
+    function snapshots_array = add_snapshot(snapshots_array, new_snapshot, method, timestamp, N, dt)
         snapshots_array(end+1).t = timestamp;
         snapshots_array(end).N = N;
         snapshots_array(end).dt = dt;
         snapshots_array(end).data = new_snapshot;
+        snapshots_array(end).method = method;
     end
     
     % Function to plot a snapshot in the active figure
@@ -120,13 +122,17 @@ function worksheet4
     end
     
     % Function to save a snapshot as an image
-    function save_snapshot(snapshot)
+    function save_snapshot(snapshot, filename)
         temp_fig = figure(100);
         set(temp_fig, 'visible', 'off'); 
         [x, y] = meshgrid(linspace(0, 1, snapshot.N+2), linspace(0, 1, snapshot.N+2));
         surf(x, y, snapshot.data);
-        title(['N=', num2str(snapshot.N), ' dt=1/', num2str(1/snapshot.dt)]);
-        saveas(gcf, ['implicit_N(', num2str(snapshot.N), ')_dt(', num2str(snapshot.dt), ')_t(', num2str(snapshot.t), ').png']);    
+        xlabel('X');
+        ylabel('Y');
+        zlabel('Temperature');
+        title([snapshot.method, ' (N=', num2str(snapshot.N), ') (dt=1/', num2str(1/snapshot.dt), ') (t=', num2str(snapshot.t), ')']);
+        set(temp_fig, 'PaperUnits', 'inches', 'PaperPosition', [0, 0, 6, 4]);
+        saveas(gcf, filename);    
         delete(temp_fig);
     end
     
@@ -146,6 +152,11 @@ function worksheet4
 
     function maximize_figure(fig)
         set(fig, 'units', 'normalized', 'outerposition', [0 0 1 1]);
+    end
+
+    function image_name = build_image_name(method, idx, N, dt, t)
+        [folder, name, ext] = fileparts(which(mfilename));
+        image_name = [folder, '/images/', method, ' ', num2str(idx), ' (N=', num2str(N), ' dt=1_', num2str(1/dt), ' t=', num2str(t), ').png'];
     end
     
 end
