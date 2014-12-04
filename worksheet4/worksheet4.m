@@ -9,8 +9,7 @@ function worksheet4
     % Simulation end time
     t_end = 4/8;
     
-    % Specify the times at which we want to take the snapshots
-    % and initialize structures to store them
+    % Specify the times at which we want to take the snapshots and initialize structures to store them
     snapshot_times = [1/8, 2/8, 3/8, 4/8];
     snapshots_implicit = struct([]);
     snapshots_explicit = struct([]);
@@ -64,7 +63,7 @@ function worksheet4
     
     toc
     
-    % Now do the plotting
+    % PLOTTING ============================================================
     
     disp('Plotting...');
     subplot_rows = length(Ns);
@@ -82,6 +81,7 @@ function worksheet4
         set(fig, 'visible', 'off');
         set_figure_title(fig, 'Explicit Euler', snapshot.t);
         plot_snapshot(snapshot, subplot_rows, subplot_cols, subplot_idx);
+%         save_snapshot(snapshot);
         
         % Plots for Implicit Euler
         snapshot = snapshots_implicit(i);
@@ -101,6 +101,8 @@ function worksheet4
     
     toc
     
+    % FUNCTIONS ===========================================================
+    
     % Function to add a snapshot into a given array of snapshots
     function snapshots_array = add_snapshot(snapshots_array, new_snapshot, timestamp, N, dt)
         snapshots_array(end+1).t = timestamp;
@@ -110,10 +112,10 @@ function worksheet4
     end
     
     % Function to plot a snapshot in the active figure
-    % Subplot index is determined based on the values of N and dt
     function plot_snapshot(snapshot, subplot_rows, subplot_cols, subplot_idx)
         subplot(subplot_rows, subplot_cols, subplot_idx);
-        meshc(snapshot.data);
+        [x, y] = meshgrid(linspace(0, 1, snapshot.N+2), linspace(0, 1, snapshot.N+2));
+        meshc(x, y, snapshot.data);
         title(['N=', num2str(snapshot.N), ' dt=1/', num2str(1/snapshot.dt)], 'FontSize', 8);
     end
     
@@ -121,7 +123,8 @@ function worksheet4
     function save_snapshot(snapshot)
         temp_fig = figure(100);
         set(temp_fig, 'visible', 'off'); 
-        surf(snapshot.data);
+        [x, y] = meshgrid(linspace(0, 1, snapshot.N+2), linspace(0, 1, snapshot.N+2));
+        surf(x, y, snapshot.data);
         title(['N=', num2str(snapshot.N), ' dt=1/', num2str(1/snapshot.dt)]);
         saveas(gcf, ['implicit_N(', num2str(snapshot.N), ')_dt(', num2str(snapshot.dt), ')_t(', num2str(snapshot.t), ').png']);    
         delete(temp_fig);
