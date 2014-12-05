@@ -13,6 +13,13 @@ function worksheet4
     snapshot_times = [1/8, 2/8, 3/8, 4/8];
     snapshots_implicit = struct([]);
     snapshots_explicit = struct([]);
+    
+    % Set the folder for storing the images (create if it does not exist)
+    [folder, name, ext] = fileparts(which(mfilename));
+    images_folder = [folder, '/images'];
+    if ~exist(images_folder, 'dir')
+        mkdir(images_folder);
+    end
 
     tic;
     
@@ -149,8 +156,7 @@ function worksheet4
     end
 
     function image_name = build_image_name(method, idx, N, dt, t)
-        [folder, name, ext] = fileparts(which(mfilename));
-        image_name = [folder, '/images/', method, ' ', num2str(idx), ' (N=', num2str(N), ' dt=1_', num2str(1/dt), ' t=', num2str(t), ').png'];
+        image_name = [images_folder, '/', method, ' ', num2str(idx), ' (N=', num2str(N), ' dt=1_', num2str(1/dt), ' t=', num2str(t), ').png'];
     end
     
 end
