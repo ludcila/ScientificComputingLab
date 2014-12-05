@@ -65,7 +65,6 @@ function worksheet4
     
     % PLOTTING ============================================================
     
-    disp('Plotting...');
     subplot_rows = length(Ns);
     subplot_cols = length(dts);
     
@@ -73,31 +72,27 @@ function worksheet4
     
     for i = 1:length(snapshots_explicit)
         
+        disp(['Plotting and saving image ', num2str(i), '/', num2str(length(snapshots_explicit))]);
+        
         % Plots for Explicit Euler
         snapshot = snapshots_explicit(i);
         fig_idx = determine_figure_idx(snapshot.t, snapshot_times);
         subplot_idx = determine_subplot_idx(snapshot.N, Ns, snapshot.dt, dts);
-        fig = figure(fig_idx);
-        set(fig, 'visible', 'off');
-        set_figure_title(fig, snapshot.method, snapshot.t);
-        plot_snapshot(snapshot, subplot_rows, subplot_cols, subplot_idx);
+        plot_snapshot(snapshot, fig_idx, subplot_rows, subplot_cols, subplot_idx);
         save_snapshot(snapshot, build_image_name(snapshot.method, i, snapshot.N, snapshot.dt, snapshot.t));
         
         % Plots for Implicit Euler
         snapshot = snapshots_implicit(i);
-        fig = figure(fig_idx + length(snapshot_times));
+        fig_idx = fig_idx + length(snapshot_times);
         subplot_idx = determine_subplot_idx(snapshot.N, Ns, snapshot.dt, dts);
-        set(fig, 'visible', 'off');
-        set_figure_title(fig, snapshot.method, snapshot.t);  
-        plot_snapshot(snapshot, subplot_rows, subplot_cols, subplot_idx);
+        plot_snapshot(snapshot, fig_idx, subplot_rows, subplot_cols, subplot_idx);
         save_snapshot(snapshot, build_image_name(snapshot.method, i, snapshot.N, snapshot.dt, snapshot.t));
         
     end
     
     % Set all figures visible again...
     for i = 1:length(snapshot_times)*2
-        fig = figure(i);
-        maximize_figure(fig);
+        maximize_figure(figure(i));
     end
     
     toc
@@ -113,8 +108,11 @@ function worksheet4
         snapshots_array(end).method = method;
     end
     
-    % Function to plot a snapshot in the active figure
-    function plot_snapshot(snapshot, subplot_rows, subplot_cols, subplot_idx)
+    % Function to plot a snapshot in the specified figure and subplot
+    function plot_snapshot(snapshot, fig_idx, subplot_rows, subplot_cols, subplot_idx)
+        fig = figure(fig_idx);
+        set(fig, 'visible', 'off');
+        set(fig, 'Name', [snapshot.method, ' (t = ', num2str(snapshot.t), ')'], 'NumberTitle', 'off');
         subplot(subplot_rows, subplot_cols, subplot_idx);
         [x, y] = meshgrid(linspace(0, 1, snapshot.N+2), linspace(0, 1, snapshot.N+2));
         meshc(x, y, snapshot.data);
@@ -132,7 +130,7 @@ function worksheet4
         zlabel('Temperature');
         title([snapshot.method, ' (N=', num2str(snapshot.N), ') (dt=1/', num2str(1/snapshot.dt), ') (t=', num2str(snapshot.t), ')']);
         set(temp_fig, 'PaperUnits', 'inches', 'PaperPosition', [0, 0, 6, 4]);
-        saveas(gcf, filename);    
+        saveas(gcf, filename);
         delete(temp_fig);
     end
     
@@ -144,10 +142,6 @@ function worksheet4
         subplot_row = find(N == Ns);
         subplot_col = find(dt == dts);
         subplot_idx = subplot_col + (subplot_row-1) * length(dts);
-    end
-
-    function set_figure_title(fig, method_name, timestamp)
-        set(fig, 'Name', [method_name, ' (t = ', num2str(timestamp), ')'], 'NumberTitle', 'off');
     end
 
     function maximize_figure(fig)
