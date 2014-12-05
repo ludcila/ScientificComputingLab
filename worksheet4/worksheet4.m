@@ -86,18 +86,18 @@ function worksheet4
         fig_idx = determine_figure_idx(snapshot.t, snapshot_times);
         subplot_idx = determine_subplot_idx(snapshot.N, Ns, snapshot.dt, dts);
         plot_snapshot(snapshot, fig_idx, subplot_rows, subplot_cols, subplot_idx);
-        save_snapshot(snapshot, build_image_name(snapshot.method, i, snapshot.N, snapshot.dt, snapshot.t));
+        save_snapshot(snapshot, build_image_name(images_folder, snapshot.method, i, snapshot.N, snapshot.dt, snapshot.t));
         
         % Plots for Implicit Euler
         snapshot = snapshots_implicit(i);
         fig_idx = fig_idx + length(snapshot_times);
         subplot_idx = determine_subplot_idx(snapshot.N, Ns, snapshot.dt, dts);
         plot_snapshot(snapshot, fig_idx, subplot_rows, subplot_cols, subplot_idx);
-        save_snapshot(snapshot, build_image_name(snapshot.method, i, snapshot.N, snapshot.dt, snapshot.t));
+        save_snapshot(snapshot, build_image_name(images_folder, snapshot.method, i, snapshot.N, snapshot.dt, snapshot.t));
         
     end
     
-    % Set all figures visible again...
+    % Set all figures visible and maximize
     for i = 1:length(snapshot_times)*2
         maximize_figure(figure(i));
     end
@@ -154,8 +154,8 @@ function worksheet4
         set(fig, 'units', 'normalized', 'outerposition', [0 0 1 1]);
     end
 
-    function image_name = build_image_name(method, idx, N, dt, t)
-        image_name = [images_folder, '/', method, ' ', num2str(idx), ' (N=', num2str(N), ' dt=1_', num2str(1/dt), ' t=', num2str(t), ').png'];
+    function image_name = build_image_name(path, method, idx, N, dt, t)
+        image_name = [path, '/', method, ' ', num2str(idx), ' (N=', num2str(N), ' dt=1_', num2str(1/dt), ' t=', num2str(t), ').png'];
     end
     
 end
