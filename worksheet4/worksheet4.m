@@ -146,9 +146,8 @@ function worksheet4
     end
 
     function subplot_idx = determine_subplot_idx(N, Ns, dt, dts)
-        subplot_row = find(N == Ns);
-        subplot_col = find(dt == dts);
-        subplot_idx = subplot_col + (subplot_row-1) * length(dts);
+        [row, col] = meshgrid(Ns, dts);
+        subplot_idx = find(row == N & col == dt);
     end
 
     function maximize_figure(fig)
