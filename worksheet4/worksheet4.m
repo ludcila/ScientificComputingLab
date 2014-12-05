@@ -20,6 +20,10 @@ function worksheet4
     if ~exist(images_folder, 'dir')
         mkdir(images_folder);
     end
+    
+    % Stability
+    stability_explicit = zeros(length(Ns), length(dts));
+    stability_implicit = zeros(length(Ns), length(dts));
 
     tic;
     
@@ -60,6 +64,12 @@ function worksheet4
                 if find(timestamp == snapshot_times)
                     snapshots_explicit = add_snapshot(snapshots_explicit, T_explicit, 'Explicit Euler', timestamp, N, dt);
                     snapshots_implicit = add_snapshot(snapshots_implicit, T_implicit, 'Implicit Euler', timestamp, N, dt);
+                end
+                
+                % At the last timestep determine if it is stable
+                if n == num_steps
+                    stability_explicit(i, j) = max(max(abs(T_explicit))) < 1;
+                    stability_implicit(i, j) = max(max(abs(T_implicit))) < 1;
                 end
                 
             end % Timestepping loop
@@ -104,8 +114,22 @@ function worksheet4
     
     toc
     
+    % STABILITY ===========================================================
+    
+    fprintf('============================== STABILITY OF EXPLICIT EULER ==============================\n\n');
+    print_stability_table(Ns, dts, stability_explicit);
+    fprintf('============================== STABILITY OF IMPLICIT EULER ==============================\n\n');
+    print_stability_table(Ns, dts, stability_implicit);
+    
     % FUNCTIONS ===========================================================
     
+    function print_stability_table(Ns, dts, stability)
+        row_names = arrayfun(@(N)(['N_', num2str(N)]), Ns, 'UniformOutput', false);
+        var_names = arrayfun(@(dt)(['dt_1_', num2str(1/dt)]), dts, 'UniformOutput', false);
+        table = array2table(stability, 'RowNames', row_names, 'VariableNames', var_names);
+        disp(table);
+    end
+
     % Function to add a snapshot into a given array of snapshots
     function snapshots_array = add_snapshot(snapshots_array, new_snapshot, method, timestamp, N, dt)
         snapshots_array(end+1).t = timestamp;
